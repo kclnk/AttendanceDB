@@ -3,45 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <title>Attendance Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
+      margin: 20px;
       background: #f7f9fc;
     }
+
     h2 {
       color: #333;
+      font-size: 1.5rem;
+      text-align: center;
     }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
     table {
       width: 100%;
+      min-width: 600px; /* Ensures the table has a baseline width */
       border-collapse: collapse;
       background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+
     th, td {
       padding: 10px;
       border: 1px solid #ccc;
       text-align: left;
+      font-size: 0.9rem;
     }
+
     th {
       background: #f0f0f0;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        margin: 10px;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      th, td {
+        padding: 8px;
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
 <body>
 
   <h2>Attendance Dashboard</h2>
-  <table id="attendance-table">
-    <thead>
-      <tr id="header-row"></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="table-container">
+    <table id="attendance-table">
+      <thead>
+        <tr id="header-row"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/18EM1j9IZ0QwfnTvpzhaYhog-97FbKMrQddAhOfsWPvI/gviz/tq?tqx=out:json&sheet=main';
   
-    // Function to fetch and display data
     function fetchData() {
       fetch(SHEET_URL)
         .then(response => response.text())
@@ -52,7 +82,6 @@
           const headers = table.cols.map(col => col.label);
           const accessIndex = headers.indexOf("Access");
 
-          // Custom headers mapping
           const customHeaders = {
             "UID": "ID",
             "Name": "Name",
@@ -61,13 +90,12 @@
             "Last Visit": "Last time"
           };
 
-          // Update the table headers dynamically with custom labels
           const thead = document.getElementById('header-row');
           thead.innerHTML = '';
           headers.forEach((label, index) => {
-            if (index !== accessIndex) {  // Skip Access column
+            if (index !== accessIndex) {
               const th = document.createElement('th');
-              const customLabel = customHeaders[label] || label;  // Use custom label if available
+              const customLabel = customHeaders[label] || label;
               th.textContent = customLabel;
               thead.appendChild(th);
             }
@@ -76,7 +104,6 @@
           const tbody = document.querySelector('#attendance-table tbody');
           tbody.innerHTML = '';
 
-          // Loop through the rows and display data
           table.rows.forEach(row => {
             const rowData = row.c.map(cell => cell ? cell.v : "");
 
@@ -84,7 +111,7 @@
 
             const tr = document.createElement('tr');
             rowData.forEach((value, index) => {
-              if (index !== accessIndex) {  // Skip Access column
+              if (index !== accessIndex) {
                 const td = document.createElement('td');
                 td.textContent = value;
                 tr.appendChild(td);
@@ -98,11 +125,8 @@
         });
     }
 
-    // Initial fetch of data
     fetchData();
-
-    // Set an interval to refresh the data every 10 seconds (10000 ms)
-    setInterval(fetchData, 10000);  // Update every 10 seconds
+    setInterval(fetchData, 10000);
   </script>
   
 </body>
