@@ -41,47 +41,68 @@
   <script>
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/18EM1j9IZ0QwfnTvpzhaYhog-97FbKMrQddAhOfsWPvI/gviz/tq?tqx=out:json&sheet=main';
   
-    fetch(SHEET_URL)
-      .then(response => response.text())
-      .then(data => {
-        const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-        const table = jsonData.table;
+    // Function to fetch and display data
+    function fetchData() {
+      fetch(SHEET_URL)
+        .then(response => response.text())
+        .then(data => {
+          const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+          const table = jsonData.table;
 
-        const headers = table.cols.map(col => col.label);
-        const accessIndex = headers.indexOf("Access");
+          const headers = table.cols.map(col => col.label);
+          const accessIndex = headers.indexOf("Access");
 
-        const thead = document.getElementById('header-row');
-        thead.innerHTML = '';
-        headers.forEach((label, index) => {
-          if (index !== accessIndex) {
-            const th = document.createElement('th');
-            th.textContent = label;
-            thead.appendChild(th);
-          }
-        });
+          // Custom headers mapping
+          const customHeaders = {
+            "UID": "ID",
+            "Name": "Name",
+            "Text To Display": "Action",
+            "Visits Count": "Attendance",
+            "Last Visit": "Last time"
+          };
 
-        const tbody = document.querySelector('#attendance-table tbody');
-        tbody.innerHTML = '';
-
-        table.rows.forEach(row => {
-          const rowData = row.c.map(cell => cell ? cell.v : "");
-
-          if (rowData[accessIndex]?.toLowerCase() === 'beep') return;
-
-          const tr = document.createElement('tr');
-          rowData.forEach((value, index) => {
-            if (index !== accessIndex) {
-              const td = document.createElement('td');
-              td.textContent = value;
-              tr.appendChild(td);
+          // Update the table headers dynamically with custom labels
+          const thead = document.getElementById('header-row');
+          thead.innerHTML = '';
+          headers.forEach((label, index) => {
+            if (index !== accessIndex) {  // Skip Access column
+              const th = document.createElement('th');
+              const customLabel = customHeaders[label] || label;  // Use custom label if available
+              th.textContent = customLabel;
+              thead.appendChild(th);
             }
           });
-          tbody.appendChild(tr);
+
+          const tbody = document.querySelector('#attendance-table tbody');
+          tbody.innerHTML = '';
+
+          // Loop through the rows and display data
+          table.rows.forEach(row => {
+            const rowData = row.c.map(cell => cell ? cell.v : "");
+
+            if (rowData[accessIndex]?.toLowerCase() === 'beep') return;
+
+            const tr = document.createElement('tr');
+            rowData.forEach((value, index) => {
+              if (index !== accessIndex) {  // Skip Access column
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.appendChild(td);
+              }
+            });
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(error => {
+          console.error("Error fetching sheet:", error);
         });
-      })
-      .catch(error => {
-        console.error("Error fetching sheet:", error);
-      });
+    }
+
+    // Initial fetch of data
+    fetchData();
+
+    // Set an interval to refresh the data every 10 seconds (10000 ms)
+    setInterval(fetchData, 10000);  // Update every 10 seconds
   </script>
   
 </body>
